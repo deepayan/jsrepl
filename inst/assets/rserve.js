@@ -926,6 +926,7 @@ Rserve.create = function(opts) {
     function hand_shake(msg)
     {
         msg = msg.data;
+	console.log(msg);
         if (typeof msg === 'string') {
             if (msg.substr(0,4) !== 'Rsrv') {
                 handle_error("server is not an RServe instance", -1);

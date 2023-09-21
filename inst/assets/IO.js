@@ -91,6 +91,7 @@ var econt = function(err, res)
 	console.log(err)
     }
     editor.session.setValue(''); // be ready again
+    document.getElementById("controls").scrollIntoView(false);
 }
 
 
@@ -118,6 +119,27 @@ processConsoleInput = function() {
     clearmessages();
     lastSubmission = editor.getValue();
     f.validateInput(lastSubmission, vcont);
+}
+
+
+// continuation to handle f.completeInput(); rename to evalIfValid()
+
+var completeIfAvailable = function(err, res)
+{
+    if (err) logmessage("R error [completeIfAvailable]: " + err);
+    else {
+	if (res !== '') {
+	    editor.insert(res);
+	}
+    }
+}
+
+completeConsoleInput = function() {
+    // clearmessages();
+    lastSubmission = editor.getValue();
+    f.getCompletions(lastSubmission,
+		     editor.getCursorPosition().column,
+		     completeIfAvailable);
 }
 
 

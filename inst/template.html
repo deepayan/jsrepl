@@ -21,8 +21,10 @@
 	<!-- <h3>Enter R code to run</h3> -->
 
 	<pre id="input">ls.str()</pre>
-	<button type="button" class="btn btn-dark" onclick="processConsoleInput();">Evaluate</button>
-
+	<div id="controls">
+	  <button type="button" class="btn btn-dark" onclick="processConsoleInput();">Evaluate</button>
+	  <button type="button" class="btn btn-light" onclick="completeConsoleInput();">Complete</button>
+	</div>
       </div>
     </div>
       
@@ -103,7 +105,7 @@ setupConnection = function() {
 scheduleInitialization = function() {
 
     // wait a while to give Rserve time to set up
-    setTimeout(setupConnection, 5000);
+    setTimeout(setupConnection, 2000);
 
 }
 

@@ -22,3 +22,8 @@ pre { margin: 0 }
     float: right;
 
 }
+
+#rconsole-container {
+    max-height: 95vh;
+    overflow: auto;
+}
