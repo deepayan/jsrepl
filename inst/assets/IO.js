@@ -6,7 +6,7 @@ var lastOutputBlock = null;
 var cmdHistory = [];
 
 logmessage = function(s) {
-    document.getElementById("logmessages").innerHTML += '<p>' + s + '</p>';
+    document.getElementById("logmessages").innerHTML += s;
 }
 
 clearmessages = function(s) {
@@ -60,6 +60,7 @@ addOutput = function(s, stream) {
     var rconsoleDiv = document.getElementById("rconsole");
     if (lastOutputBlock === null) {
     	lastOutputBlock = document.createElement("pre");
+	lastOutputBlock.className = "outchunk";
 	lastOutputBlock.innerHTML = s;
 	rconsoleDiv.appendChild(lastOutputBlock);
     }
@@ -87,7 +88,7 @@ addOutput = function(s, stream) {
 var econt = function(err, res)
 {
     if (err) {
-	logmessage("R error [econt]");
+	logmessage("<p>R error [econt]</p>");
 	console.log(err)
     }
     editor.session.setValue(''); // be ready again
@@ -99,17 +100,17 @@ var econt = function(err, res)
 
 var vcont = function(err, res)
 {
-    if (err) logmessage("R error [vcont]: " + err);
+    if (err) logmessage("<p>R error [vcont]: " + err + "</p>");
     else {
 	if (res == '') {
-	    logmessage("[OK] Executing: <code>" + lastSubmission + "</code>");
+	    logmessage("<p>[OK] Executing: <code>" + lastSubmission + "</code></p>");
 	    editor.session.setValue('[WAITING]');
 	    addInput(lastSubmission);
 	    addtohistory(lastSubmission);
 	    f.evalInput(lastSubmission, econt);
 	}
 	else {
-	    logmessage("Validation error: <code>" + res + "</code>");
+	    logmessage("<p>Validation error: <code>" + res + "</code></p>");
 	    // don't do anything else
 	}
     }
@@ -126,7 +127,7 @@ processConsoleInput = function() {
 
 var completeIfAvailable = function(err, res)
 {
-    if (err) logmessage("R error [completeIfAvailable]: " + err);
+    if (err) logmessage("<p>R error [completeIfAvailable]: " + err + "</p>");
     else {
 	if (res !== '') {
 	    editor.insert(res);
@@ -146,7 +147,10 @@ completeConsoleInput = function() {
 processOOBSEND = function(msg) {
     var stream = msg[0];
     var payload = msg[1];
-    logmessage("OOB SEND [ " + stream + " ]: <pre>" + payload + "</pre>");
+    if (stream == "console.out")
+	logmessage(".");
+    else
+	logmessage("<p>OOB SEND [ " + stream + " ]: <pre>" + payload + "</pre></p>");
     // var rconsoleDiv = document.getElementById("rconsole");
     if (stream == "console.out") {
 	lastInputBlock = null;

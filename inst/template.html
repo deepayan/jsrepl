@@ -13,9 +13,13 @@
   </head>
 
   <body onload='scheduleInitialization();'>
-    <div class="container">
-      <div id="logmessages"><h3>Messages</h3></div>
-      <div id="rconsole-container">
+    <div class="container-fluid">
+
+      <div id="tabbed-container" class="fixed-height-container">
+	<div id="logmessages"><h3>Messages</h3></div>
+      </div>
+
+      <div id="rconsole-container" class="fixed-height-container">
 	<div id="rconsole"><pre>Welcome to R REPL!</pre></div>
 
 	<!-- <h3>Enter R code to run</h3> -->
@@ -48,6 +52,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.1/ace.min.js" integrity="sha512-Jvb+MTAHCHRq5MfeTXL4V7bdkKG5ybsUbjyjHaNEKUFby4qEs8Id3mVcb2S5ft+v/SV00r+/hTOyzmJ0Rif0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="assets/editor.js"></script>
 
+
+    <!-- To support some terminal escape sequences: https://gist.github.com/walling/7543151 -->
+    <!-- Include <script src="assets/term2html.js"></script> and call term2html(payload) -->
     <script src="assets/IO.js"></script>
 
     <script>

@@ -13,17 +13,30 @@ pre { margin: 0 }
     /* bottom: 0; */
     /* left: 0; */
 }
-#rconsole {
-    width: 70%;
+
+.fixed-height-container {
+    max-height: 95vh;
+    overflow: auto;
+    /* border: 1px solid red; */
 }
 
-#logmessages {
-    width: 29%;
+#tabbed-container {
+    width: 38%;
     float: right;
-
 }
 
 #rconsole-container {
-    max-height: 95vh;
-    overflow: auto;
+    width: 60%;
 }
+
+#rconsole, #logmessages {
+    width: 100%;
+}
+
+.outchunk {
+    max-height: 75vh;
+    width: 95%;
+    overflow: auto;
+    /* border: 1px solid red; */
+}
+
