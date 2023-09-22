@@ -123,7 +123,7 @@ processConsoleInput = function() {
 }
 
 
-// continuation to handle f.completeInput(); rename to evalIfValid()
+// continuation to handle f.completeInput();
 
 var completeIfAvailable = function(err, res)
 {

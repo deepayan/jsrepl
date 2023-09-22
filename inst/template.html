@@ -26,8 +26,10 @@
 
 	<pre id="input">ls.str()</pre>
 	<div id="controls">
-	  <button type="button" class="btn btn-dark" onclick="processConsoleInput();">Evaluate</button>
-	  <button type="button" class="btn btn-light" onclick="completeConsoleInput();">Complete</button>
+	  <button type="button" class="btn btn-dark"
+		  onclick="connectAndRun(processConsoleInput);">Evaluate</button>
+	  <button type="button" class="btn btn-light"
+		  onclick="connectAndRun(completeConsoleInput);">Complete</button>
 	</div>
       </div>
     </div>
@@ -55,6 +57,7 @@
 
     <!-- To support some terminal escape sequences: https://gist.github.com/walling/7543151 -->
     <!-- Include <script src="assets/term2html.js"></script> and call term2html(payload) -->
+    <script src="assets/connection.js"></script>
     <script src="assets/IO.js"></script>
 
     <script>
@@ -69,45 +72,8 @@
 // };
 
 // global placeholders
+
 var ws, f;
-
-setupConnection = function() {
-    
-    ws = Rserve.create({
-	host: 'ws://localhost:8012',
-
-	on_connect: function() {
-	    // the capability passed on connect is in `this.ocap`
-	    fcap = this.ocap;
-	    logmessage("Connected!");
-
-	    var cont = function(err, res) {
-		if (err) logmessage("R error! Initialization failed: " + err);
-		else f = res;
-	    }
-	    // FIXME: how do I pass arguments, e.g., to authenticate?
-	    fcap(cont);
-	},
-
-	on_data: function(msg) { // OOB send callback - one-way messages from R to Javascript
-            msg = msg.value.json();
-	    processOOBSEND(msg);
-	},
-
-	// oobMessage are handled by the function provided in
-	// on_oob_message of the from function(data, continutation)
-	// where the continutation has the standard form
-	// function(error, result)
-
-	on_oob_message: function(msg, k) {
-            msg = msg.value.json();
-            console.log("OOB MSG: " + msg);
-            k(null, "OK");
-	}
-	
-    });
-
-}
 
 scheduleInitialization = function() {
 

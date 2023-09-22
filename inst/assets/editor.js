@@ -15,7 +15,8 @@ editor.commands.addCommand({
     bindKey: {win: 'Ctrl-Enter',  mac: 'Command-Enter'},
     // bindKey: {win: 'Enter',  mac: 'Enter'},
     exec: function(editor) { 
-	processConsoleInput(); // if Enter, need to change several
+	connectAndRun(processConsoleInput);
+	// if Enter, need to change several
 	// things, like insert newline if incomplete, and
 	// preferably no matching parens / braces
     },
@@ -25,7 +26,8 @@ editor.commands.addCommand({
     name: 'complete',
     bindKey: {win: 'Tab',  mac: 'Tab'},
     exec: function(editor) { 
-	completeConsoleInput(); // With TAB, need to think about indentation as well
+	connectAndRun(completeConsoleInput);
+	// With TAB, need to think about indentation as well
     },
     readOnly: false, // false if this command should not apply in readOnly mode
 });
