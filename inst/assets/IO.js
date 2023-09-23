@@ -19,6 +19,11 @@ addtohistory = function(s) {
 }
 
 
+addtoScriptEditor = function(s) {
+    logmessage("<br>" + s);
+}
+
+
 addInput = function(s) {
     // This should create a new div if lastInputBlock=null (which
     // will happen initially, and also when, e.g., an output div is
@@ -31,7 +36,10 @@ addInput = function(s) {
     else
 	inDiv = lastInputBlock;
     inCode = document.createElement("code"); // TODO: syntax highlight via prism
-    inCode.classList.add("language-R");
+    if (input_pending)
+	inCode.classList.add("language-plaintext"); // FIXME
+    else
+	inCode.classList.add("language-R");
     inCode.innerHTML = s;
     inDiv.appendChild(inCode);
     Prism.highlightElement(inCode);
@@ -83,6 +91,11 @@ addOutput = function(s, stream) {
 // first.
 
 
+setStatusMessage = function(s) {
+    document.getElementById("statusbuffer").innerHTML = s;
+}
+
+
 
 // continuation to handle f.evalInput()
 var econt = function(err, res)
@@ -92,6 +105,7 @@ var econt = function(err, res)
 	console.log(err)
     }
     editor.session.setValue(''); // be ready again
+    setStatusMessage('[READY]');
     document.getElementById("controls").scrollIntoView(false);
 }
 
@@ -103,10 +117,11 @@ var vcont = function(err, res)
     if (err) logmessage("<p>R error [vcont]: " + err + "</p>");
     else {
 	if (res == '') {
-	    logmessage("<p>[OK] Executing: <code>" + lastSubmission + "</code></p>");
-	    editor.session.setValue('[WAITING]');
-	    addInput(lastSubmission);
+	    addtoScriptEditor(lastSubmission);
 	    addtohistory(lastSubmission);
+	    addInput(lastSubmission);
+	    setStatusMessage('[Waiting...]');
+	    editor.session.setValue('');
 	    f.evalInput(lastSubmission, econt);
 	}
 	else {
@@ -117,9 +132,19 @@ var vcont = function(err, res)
 }
 
 processConsoleInput = function() {
-    clearmessages();
+    // clearmessages();
     lastSubmission = editor.getValue();
-    f.validateInput(lastSubmission, vcont);
+    // if a OOB message response is pending, treat as
+    // response. Otherwise do standard validation and evaluation.
+    if (input_pending) {
+	setStatusMessage("[Waiting]");
+	addInput(lastSubmission);
+	input_pending = false;
+	editor.session.setValue('');
+	document.getElementById("controls").scrollIntoView(false);
+	input_cont(null, lastSubmission);
+    }
+    else f.validateInput(lastSubmission, vcont);
 }
 
 
@@ -137,6 +162,7 @@ var completeIfAvailable = function(err, res)
 
 completeConsoleInput = function() {
     // clearmessages();
+    setStatusMessage("[Ready]");
     lastSubmission = editor.getValue();
     f.getCompletions(lastSubmission,
 		     editor.getCursorPosition().column,
@@ -147,26 +173,27 @@ completeConsoleInput = function() {
 processOOBSEND = function(msg) {
     var stream = msg[0];
     var payload = msg[1];
-    if (stream == "console.out")
-	logmessage(".");
-    else
-	logmessage("<p>OOB SEND [ " + stream + " ]: <pre>" + payload + "</pre></p>");
-    // var rconsoleDiv = document.getElementById("rconsole");
+    // FIXME switch to switch
     if (stream == "console.out") {
 	lastInputBlock = null;
 	addOutput(payload, stream);
     }
-    if (stream == "console.err") {
+    else if (stream == "console.err") {
 	lastInputBlock = null;
 	addOutput(payload, stream);
     }
-    if (stream == "console.reset") {
+    else if (stream == "console.reset") {
 	// nothing to do
     }
-    if (stream == "console.msg") {
+    else if (stream == "console.msg") {
 	lastInputBlock = null;
 	addOutput(payload, stream);
     }
+    else if (stream == "possible.completions") {
+	setStatusMessage("<code>" + payload + "</code>")
+    }
+    else
+	logmessage("<br>OOB SEND [ " + stream + " ]: <code>" + payload + "</code>");
     
     // "console.out": regular output
     // "console.err": error output
@@ -176,11 +203,32 @@ processOOBSEND = function(msg) {
     return;
 }
 
+var input_pending = false;
+var input_cont = null;
+
+// We can ask the user for a response, but we won't get it
+// immediately. So we pass along the continuation, and call it when
+// the user submits a response, with the assumption that the
+// continuation (which had been provided by the caller) knows what to
+// do with it.
+
+processOOBMSG = function(msg, cont) {
+    let stream = msg[0];
+    let payload = msg[1];
+    if (stream != "console.in") {
+	logmessage("<br>[UNKNOWN stream] OOB MSG [ " + stream + " ]:")
+	logmessage("<pre>" + payload + "</pre>");
+	cont("Unknown stream " + stream, null);
+    }
+    else {
+	logmessage("<br>OOB MSG:" + stream);
+	input_pending = true;
+	input_cont = cont;
+	setStatusMessage("[Waiting for input]");
+    }
+}
 
 
-
-
-      
 // automatic highlight disabled using 'data-manual' attribute below
 // window.Prism = window.Prism || {};
 // Prism.manual = true;

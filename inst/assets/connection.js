@@ -9,6 +9,7 @@ setupConnection = function() {
 	    // the capability passed on connect is in `this.ocap`
 	    fcap = this.ocap;
 	    logmessage("Connected!");
+	    setStatusMessage("[Ready]");
 
 	    var cont = function(err, res) {
 		if (err) logmessage("R error! Initialization failed: " + err);
@@ -23,15 +24,16 @@ setupConnection = function() {
 	    processOOBSEND(msg);
 	},
 
-	// oobMessage are handled by the function provided in
-	// on_oob_message of the from function(data, continutation)
-	// where the continutation has the standard form
-	// function(error, result)
+	// The response to an oobMessage is sent back to the client by
+	// calling the continuation 'cont' provided by it, where the
+	// continutation has the standard form function(error,
+	// result).  We never raise an error. We simply ask the user
+	// for a response, and call cont(null, response) once it is
+	// available.
 
-	on_oob_message: function(msg, k) {
+	on_oob_message: function(msg, cont) {
             msg = msg.value.json();
-            console.log("OOB MSG: " + msg);
-            k(null, "foobar");
+	    processOOBMSG(msg, cont);
 	}
 	
     });

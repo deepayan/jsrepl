@@ -33,6 +33,7 @@ pre { margin: 0 }
     width: 100%;
 }
 
+/* individual output chunks */
 .outchunk {
     max-height: 75vh;
     width: 95%;

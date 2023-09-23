@@ -26,10 +26,11 @@
 
 	<pre id="input">ls.str()</pre>
 	<div id="controls">
-	  <button type="button" class="btn btn-dark"
-		  onclick="connectAndRun(processConsoleInput);">Evaluate</button>
-	  <button type="button" class="btn btn-light"
-		  onclick="connectAndRun(completeConsoleInput);">Complete</button>
+	  <div class="alert alert-light" role="alert">
+	    <button type="button" class="btn btn-dark"
+		    onclick="connectAndRun(processConsoleInput);">►</button>
+	    <span id="statusbuffer">Waiting to connect...</span>
+	  </div>
 	</div>
       </div>
     </div>

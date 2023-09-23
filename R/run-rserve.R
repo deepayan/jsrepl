@@ -95,7 +95,9 @@ run_rserve <- function()
                oob = TRUE,
                console.oob = TRUE,
                forward.stdio = TRUE,
-               console.input = TRUE)
+               console.input = TRUE,
+
+               interactive = TRUE)
 
 }
 
