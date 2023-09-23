@@ -61,8 +61,11 @@ addOutput = function(s, stream) {
     if (stream == "console.err") {
 	s = '<span class="r-error"><strong>' + s + '</strong></span>'
     }
-    if (stream == "console.msg") {
+    else if (stream == "console.msg") {
 	s = '<span class="r-message"><em>' + s + '</em></span>'
+    }
+    else if (stream == "stdout") {
+	s = '<div class="r-stdout">' + s + '</div>'
     }
  
     var rconsoleDiv = document.getElementById("rconsole");
@@ -186,6 +189,11 @@ processOOBSEND = function(msg) {
 	// nothing to do
     }
     else if (stream == "console.msg") {
+	lastInputBlock = null;
+	addOutput(payload, stream);
+    }
+    else if (stream == "stdout") {
+	// default pager - usually multiple lines 
 	lastInputBlock = null;
 	addOutput(payload, stream);
     }
