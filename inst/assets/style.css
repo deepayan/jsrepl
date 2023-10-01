@@ -1,13 +1,16 @@
 body { font-family: Helvetica; font-size: 12pt; }
-#input { font-family: Courier; }
+
+code.language-r { font-family: 'Fira Code', Courier; font-size: 16px; }
+#input { font-family: 'Fira Code', Courier; font-size: 16px;}
+
 #rconsole { font-family: Courier; }
 pre { margin: 0 }
 #input { 
     /* position: absolute; */
     /* min-height: 100px; */
-    width: 70%;
+    width: 100%;
     border-left: solid red 10px;
-    font-size: 14pt;
+    margin-top: 5px;
     /* top: 0; */
     /* right: 0; */
     /* bottom: 0; */
