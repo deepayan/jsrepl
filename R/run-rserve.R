@@ -83,7 +83,12 @@ run_rserve <- function()
 
     ## Needed, though not sure who calls it. Must be put in global env
     .GlobalEnv$oc.init <- function() ocap(auth)
-
+    .GlobalEnv$.http.request <- function(...) {
+        tools:::httpd(...)
+    }
+    options(help_type = "html")
+    tools:::httpdPort(new = 8899) # needed to keep from R starting its own server [?]
+    
     ## Rserve.context("default")
     
     run.Rserve(qap = FALSE,
@@ -97,6 +102,7 @@ run_rserve <- function()
                forward.stdio = TRUE,
                console.input = TRUE,
 
+               http.port = 8899,
                interactive = TRUE)
 
 }
