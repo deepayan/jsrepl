@@ -9,7 +9,7 @@ setupConnection = function() {
 	    // the capability passed on connect is in `this.ocap`
 	    fcap = this.ocap;
 	    logmessage("Connected!");
-	    setStatusMessage("[Ready]");
+	    setStatusMessage(null);
 
 	    var cont = function(err, res) {
 		if (err) logmessage("R error! Initialization failed: " + err);

@@ -3,22 +3,85 @@ var lastSubmission = '';
 var lastInputBlock = null;
 var lastOutputBlock = null;
 
-var cmdHistory = [];
-
 logmessage = function(s) {
     document.getElementById("logmessages").innerHTML += s;
 }
-
+  
 clearmessages = function(s) {
     document.getElementById("logmessages").innerHTML = '<h3>Messages</h3>';
+}
+
+// COMMAND HISTORY
+
+// This is fairly simple to handle at the javascript level, but
+// eventually we may prefer to do it in R if we want R sessions to be
+// persistent (i.e., connect to same R session from multiple browser
+// sessions, or when the browser page is reloaded).
+
+// NOTE: keeping track of edits is tricky --- what happens if you go
+// up, change something, and then go further back up. Does the change
+// persist, or revert? readline is actually quite complicated --- it
+// saves the edits until the (edited) command is actually executed,
+// and at that point reverts the old command to the original. Any
+// unexecuted but edited old command remains edited.
+
+// For now, we will just forget any edits as soon as we go up or down
+// (but that must eventually change)
+
+var cmdHistory = [];
+var unsubmittedCmd = '';
+var historyIndex = -1; // -1 is new, 0, ..., cmdHistory.length previous (in reverse order)
+
+function resetHistory() {
+    historyIndex = -1;
 }
 
 addtohistory = function(s) {
     cmdHistory[cmdHistory.length] = s;
     // should trim when list becomes too long
+    resetHistory();
+}
+
+ShowPreviousCmd = function() {
+    // If no more history left, don't do anything. if historyIndex ==
+    // -1 (currently editing new command), save current as
+    // unsubmittedCmd, then show previous command and change
+    // historyIndex. Otherwise show previous command and update
+    // historyIndex.
+
+    let nhistory = cmdHistory.length; // could be zero
+    // any history left? Yes unless we are currently at nhistory - 1
+    if (historyIndex == nhistory - 1) return;
+    if (historyIndex == -1) unsubmittedCmd = editor.getValue();
+    historyIndex++;
+    editor.session.setValue('');
+    editor.insert(cmdHistory[nhistory - 1 - historyIndex]);
+}
+
+ShowNextCmd = function() {
+    // if historyIndex == -1 (currently editing new command), do
+    // nothing.  If historyIndex == 0 (no more history left) update
+    // historyIndex and show unsubmitted.  Otherwise show next command
+    // and update historyIndex.
+
+    let nhistory = cmdHistory.length;
+    // any history left? Yes unless we are currently at nhistory - 1
+    if (historyIndex == -1) return;
+    editor.session.setValue('');
+    historyIndex--;
+    if (historyIndex == -1) {
+	editor.insert(unsubmittedCmd);
+    }
+    else {
+	editor.insert(cmdHistory[nhistory - 1 - historyIndex]);
+    }
 }
 
 
+// DONE HISTORY
+
+
+// TODO once we actually have a script editor
 addtoScriptEditor = function(s) {
     logmessage("<br>" + s);
 }
@@ -95,6 +158,10 @@ addOutput = function(s, stream) {
 
 
 setStatusMessage = function(s) {
+    if (s === null) s =
+	"[Ready]" + " [ Submit: <code>Ctrl+Enter</code> ]" +
+	" [ History: <code>Ctrl+Up | Down</code> ]" +
+	" [ Complete: <code>TAB</code> ]";
     document.getElementById("statusbuffer").innerHTML = s;
 }
 
@@ -108,7 +175,7 @@ var econt = function(err, res)
 	console.log(err)
     }
     editor.session.setValue(''); // be ready again
-    setStatusMessage('[READY]');
+    setStatusMessage(null);
     document.getElementById("controls").scrollIntoView(false);
 }
 
@@ -165,7 +232,7 @@ var completeIfAvailable = function(err, res)
 
 completeConsoleInput = function() {
     // clearmessages();
-    setStatusMessage("[Ready]");
+    setStatusMessage(null);
     lastSubmission = editor.getValue();
     f.getCompletions(lastSubmission,
 		     editor.getCursorPosition().column,

@@ -12,7 +12,7 @@ editor.session.setUseSoftTabs(true);
 editor.session.setTabSize(4);
 editor.commands.addCommand({
     name: 'eval',
-    bindKey: {win: 'Ctrl-Enter',  mac: 'Command-Enter'},
+    bindKey: {win: 'Ctrl-Enter',  mac: 'Ctrl-Enter'},
     // bindKey: {win: 'Enter',  mac: 'Enter'},
     exec: function(editor) { 
 	connectAndRun(processConsoleInput);
@@ -28,6 +28,22 @@ editor.commands.addCommand({
     exec: function(editor) { 
 	connectAndRun(completeConsoleInput);
 	// With TAB, need to think about indentation as well
+    },
+    readOnly: false, // false if this command should not apply in readOnly mode
+});
+editor.commands.addCommand({
+    name: 'prevcmd',
+    bindKey: {win: 'Ctrl-Up',  mac: 'Ctrl-Up'},
+    exec: function(editor) { 
+	connectAndRun(ShowPreviousCmd);
+    },
+    readOnly: false, // false if this command should not apply in readOnly mode
+});
+editor.commands.addCommand({
+    name: 'nextcmd',
+    bindKey: {win: 'Ctrl-Down',  mac: 'Ctrl-Down'},
+    exec: function(editor) { 
+	connectAndRun(ShowNextCmd);
     },
     readOnly: false, // false if this command should not apply in readOnly mode
 });
