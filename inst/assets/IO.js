@@ -243,6 +243,8 @@ completeConsoleInput = function() {
 processOOBSEND = function(msg) {
     var stream = msg[0];
     var payload = msg[1];
+    logmessage("<br>--processOOBSEND: stream = " + stream +
+	       " / payload = " + payload);
     // FIXME switch to switch
     if (stream == "console.out") {
 	lastInputBlock = null;

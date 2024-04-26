@@ -20,6 +20,7 @@ setupConnection = function() {
 	},
 
 	on_data: function(msg) { // OOB send callback - one-way messages from R to Javascript
+	    logmessage("<br>--In call: on_data--");
             msg = msg.value.json();
 	    processOOBSEND(msg);
 	},
@@ -32,6 +33,7 @@ setupConnection = function() {
 	// available.
 
 	on_oob_message: function(msg, cont) {
+	    logmessage("<br>--In call: on_oob_message --");
             msg = msg.value.json();
 	    processOOBMSG(msg, cont);
 	}
