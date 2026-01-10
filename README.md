@@ -3,6 +3,15 @@
 A REPL for R that works in a browser, communicating with R using
 Javascript via the Rserve package.
 
+One modification is needed in the `inst/Rserv.conf` file before
+installing.  After installing the package, try
+
+```r
+jsrepl::start_repl()
+```
+
+from a terminal.
+
 
 # Bugs / missing features
 
@@ -99,7 +108,7 @@ Windows. This is a major deal-breaker.
 
 Status check:
 
-* Linux: 
+* Linux: Works
 
 * Mac: Works
 
@@ -147,7 +156,7 @@ become usable.
 
 Status check:
 
-* Linux: 
+* Linux: Prompts do not get shown
 
 * Mac: Prompts do not get shown
 
@@ -163,7 +172,7 @@ Windows.
 
 Status check:
 
-* Linux: 
+* Linux: Input is accepted and sent to R for processing
 
 * Mac: Input is accepted and sent to R for processing
 
