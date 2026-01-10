@@ -1,3 +1,5 @@
+// This is from https://github.com/cscheid/rserve-js (MIT license)
+
 (function() {
 
 var Rserve = {};
@@ -925,6 +927,7 @@ Rserve.create = function(opts) {
 
     function hand_shake(msg)
     {
+	global_msg = msg;
         msg = msg.data;
 	console.log(msg);
         if (typeof msg === 'string') {
