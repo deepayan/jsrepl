@@ -20,8 +20,7 @@ from a terminal.
 
   
 * Output without newlines are not actually sent immediately, unless
-  `flush.console()` is called explicitly (not sure if even this works
-  in Linux).
+  `flush.console()` is called explicitly.
 
 ```r
 for (i in 1:5) { 
@@ -67,10 +66,11 @@ state in terms of global environment, packages, etc.) or different
 sessions?
 
 Both scenarios have their uses. Rserve thinks that a new session is
-"better", and does that on Linux / Mac using fork, but not on Windows
-because there is no fork. As far as I can tell, there is no way to get
-persistence on Linux / Mac. (FIXME Is there supposed to be a way that
-does not work?)
+"better", and does that on Linux / Mac, but not on Windows because of
+OS limitations. As far as I can tell, there is no way to get
+persistence on Linux / Mac. Note that just disabling fork/vfork
+detection in configure is not enough (FIXME Is there supposed to be a
+way that does not work?)
 
 Status check:
 
