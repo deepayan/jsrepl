@@ -2,7 +2,7 @@
 
 setupConnection = function() {
     
-    ws = Rserve.create({
+    ws = Rserve.connect({
 	host: 'ws://localhost:8012',
 
 	on_connect: function() {

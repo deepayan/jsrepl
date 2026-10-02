@@ -1507,5 +1507,118 @@ Rserve.write_into_view = function(value, array_buffer_view, forced_type, convert
 };
 
 })();
+
+/* Rserve.connect(opts) — singleton connection manager.
+ *
+ * In COOPERATIVE (non-forked) Rserve, only one client connection is served at
+ * a time.  If a second browser tab (or a page reload) tries to connect while
+ * the first connection is still active, the server will preempt the first
+ * connection (via our cio_recv patch) and accept the new one.  However there
+ * is a brief window — from when the old connection is preempted until Rserve
+ * loops back to accept() the new one — during which the new WebSocket's HTTP
+ * upgrade request gets no 101 response.  We handle this with retry logic.
+ *
+ * Additionally, if the caller simply wants to reuse an existing open
+ * connection (e.g. page components calling Rserve.connect independently),
+ * this function returns the cached connection object without creating a new
+ * WebSocket.
+ *
+ * opts — same as Rserve.create() opts, plus:
+ *   force_reconnect: boolean — if true, close any existing connection first
+ *                              (default false)
+ *   retry_delay:     number  — ms to wait between reconnect attempts when
+ *                              the server has not yet accepted the new
+ *                              connection (default 500)
+ *   max_retries:     number  — maximum reconnect attempts (default 10)
+ */
+Rserve._connections = {}; /* keyed by host URL */
+
+Rserve.connect = function(opts) {
+    opts = opts || {};
+    var host = opts.host || 'ws://127.0.0.1:8081';
+    var retry_delay = opts.retry_delay || 500;
+    var max_retries = (opts.max_retries !== undefined) ? opts.max_retries : 10;
+    var retries_left = max_retries;
+    var conn_entry = Rserve._connections[host];
+
+    /* Reuse existing live connection unless force_reconnect is set */
+    if (conn_entry && !opts.force_reconnect) {
+        var existing = conn_entry.result;
+        if (existing && existing.running && !existing.closed) {
+            /* Already connected — call on_connect immediately and return */
+            if (opts.on_connect)
+                setTimeout(function() { opts.on_connect.call(existing); }, 0);
+            return existing;
+        }
+    }
+
+    /* Close any stale previous connection */
+    if (conn_entry && conn_entry.result) {
+        try { conn_entry.result.close(); } catch(e) {}
+    }
+    delete Rserve._connections[host];
+
+    function attempt() {
+        var attempt_opts = {};
+        /* copy all opts */
+        for (var k in opts) if (opts.hasOwnProperty(k)) attempt_opts[k] = opts[k];
+        attempt_opts.host = host;
+
+        /* Wrap on_connect to register success and reset retry state */
+        var user_onconnect = opts.on_connect || function() {};
+        attempt_opts.on_connect = function() {
+            retries_left = max_retries; /* reset for future reconnects */
+            if (Rserve._connections[host])
+                Rserve._connections[host].connecting = false;
+            user_onconnect.call(this);
+        };
+
+        /* Wrap on_close to clean up the cache entry */
+        var user_onclose = opts.on_close || null;
+        attempt_opts.on_close = function(msg) {
+            var entry = Rserve._connections[host];
+            if (entry && entry.result && entry.result.closed)
+                delete Rserve._connections[host];
+            if (user_onclose) user_onclose(msg);
+        };
+
+        /* Wrap on_error to retry when the server hasn't accepted yet.
+           The most common case is that Rserve is still closing the previous
+           connection and has not called accept() on the new one yet, so the
+           WebSocket upgrade fails.  We retry with backoff. */
+        var user_onerror = opts.on_error || null;
+        attempt_opts.on_error = function(error, status) {
+            if (retries_left > 0 && !result_obj.running) {
+                retries_left--;
+                setTimeout(function() {
+                    /* Only retry if nobody else took over this slot */
+                    var entry = Rserve._connections[host];
+                    if (entry && entry.result === result_obj)
+                        attempt();
+                }, retry_delay);
+                return; /* suppress error — will retry */
+            }
+            if (user_onerror) user_onerror(error, status);
+            else throw new Rserve.RserveError(error, status);
+        };
+
+        var result_obj = Rserve.create(attempt_opts);
+        Rserve._connections[host] = { result: result_obj, connecting: true };
+        return result_obj;
+    }
+
+    return attempt();
+};
+
+/* Rserve.disconnect(host) — explicitly close and remove a cached connection. */
+Rserve.disconnect = function(host) {
+    host = host || 'ws://127.0.0.1:8081';
+    var entry = Rserve._connections[host];
+    if (entry && entry.result) {
+        try { entry.result.close(); } catch(e) {}
+    }
+    delete Rserve._connections[host];
+};
+
 this.Rserve = Rserve;
 })();
